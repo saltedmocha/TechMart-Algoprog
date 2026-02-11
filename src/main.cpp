@@ -1,6 +1,7 @@
 #include <algorithm>
 #include <cstddef>
 #include <iostream>
+#include <iterator>
 #include <limits>
 #include <ostream>
 #include <string>
@@ -77,6 +78,20 @@ std::string get_text_input(const std::string &prompt)
 	}
 }
 
+// Pada kedua fungsi ini tidak perlu dilakukan cek data kosong atau tidak
+// Semua data yang "kosong" akan memiliki nilai "" untuk string
+// Dan 0 untuk int / double
+// Saat dilakukan print / cout data yang kosong akan secara otomatis di filter
+bool comp_stock_asc(Product *stock_a, Product *stock_b)
+{
+	return stock_a->stock < stock_b->stock;
+}
+
+bool comp_stock_des(Product *stock_a, Product *stock_b)
+{
+	return stock_a->stock > stock_b->stock;
+}
+
 // Pembersih console / cmd tanpa bergantung
 // Ke tipe atau jenis sistem operasi
 void clrscrn()
@@ -132,16 +147,24 @@ class Inventaris
 
 	int array_length()
 	{
+		int length = 0;
+		for (Product *data : m_products_data) {
+			if (!data->is_empty())
+				length++;
+		}
+
+		return length;
 	}
 
-	bool comp_stock_des(const Product *stock_a, const Product *stock_b)
+	bool is_fully_empty()
 	{
-		return stock_a->stock > stock_b->stock;
-	}
+		for (Product *data : m_products_data) {
+			if (!data->is_empty()) {
+				return false;
+			}
+		}
 
-	bool comp_stock_asc(const Product *stock_a, const Product *stock_b)
-	{
-		return stock_a->stock < stock_b->stock;
+		return true;
 	}
 
 	void search_by_name(std::string name)
@@ -210,70 +233,28 @@ class Inventaris
 		}
 	}
 
-      public:
-	Inventaris()
+	void print_data(Product **arr_products_data)
 	{
-		for (size_t i = 0; i < MAX_SIZE; i++) {
-			m_products_data[i] = m_product_init;
-		}
-	}
-
-	void menu1_add_product()
-	{
-		clrscrn();
-		std::cout << "===== Tambah Produk Baru =====" << "\n";
-
-		Product *product_data = new Product{};
-
-		product_data->product_code = input_product_code();
-		product_data->name = get_text_input("Nama produk: ");
-		product_data->category = get_text_input("Kategori produk: ");
-		product_data->price = get_number_input<double>(
-			"Harga produk: ", 0,
-			std::numeric_limits<double>::max());
-		product_data->stock = get_number_input<int>(
-			"Stock produk: ", 0, std::numeric_limits<int>::max());
-
-		for (size_t i = 0; i < MAX_SIZE; i++) {
-			if (m_products_data[i]->is_empty()) {
-				m_products_data[i] = product_data;
-				std::cout << "Data berhasil ditambahkan."
-					  << "\n";
-
-				return;
-				break;
-			}
-		}
-	}
-
-	void menu2_view_product()
-	{
-		clrscrn();
-		std::cout << "===== Produk TechMart =====" << "\n";
-		// Jika kosong berikan peringatan lalu keluar
-		if (m_products_data[0] == m_product_init) {
-			std::cout
-				<< "Data produk kosong, tolong tambahkan data terlebih dahulu"
-				<< std::endl;
-			return;
-		}
-
 		int counter = 1;
-		for (Product *data : m_products_data) {
-			if (!data->is_empty()) {
+
+		for (int i = 0; i < MAX_SIZE; i++) {
+			if (!arr_products_data[i]->is_empty()) {
 				std::cout
 					<< "\n"
 					<< "=============================================="
 					<< "\n"
-					<< "Kode produk: " << data->product_code
+					<< "Kode produk: "
+					<< arr_products_data[i]->product_code
 					<< "\n"
-					<< "Nama produk: " << data->name << "\n"
-					<< "Kategori produk: " << data->category
+					<< "Nama produk: "
+					<< arr_products_data[i]->name << "\n"
+					<< "Kategori produk: "
+					<< arr_products_data[i]->category
 					<< "\n"
-					<< "Harga produk: " << data->price
-					<< "\n"
-					<< "Stock produk: " << data->stock
-					<< "\n"
+					<< "Harga produk: "
+					<< arr_products_data[i]->price << "\n"
+					<< "Stock produk: "
+					<< arr_products_data[i]->stock << "\n"
 					<< "=============================================="
 					<< "\n";
 				if (counter == 10) {
@@ -302,11 +283,71 @@ class Inventaris
 		}
 	}
 
+      public:
+	Inventaris()
+	{
+		for (int i = 0; i < MAX_SIZE; i++) {
+			m_products_data[i] = m_product_init;
+		}
+	}
+
+	void menu1_add_product()
+	{
+		clrscrn();
+		std::cout << "===== Tambah Produk Baru =====" << "\n";
+
+		Product *product_data = new Product{};
+
+		product_data->product_code = input_product_code();
+		product_data->name = get_text_input("Nama produk: ");
+		product_data->category = get_text_input("Kategori produk: ");
+		product_data->price = get_number_input<double>(
+			"Harga produk: ", 0,
+			std::numeric_limits<double>::max());
+		product_data->stock = get_number_input<int>(
+			"Stock produk: ", 0, std::numeric_limits<int>::max());
+
+		for (int i = 0; i < MAX_SIZE; i++) {
+			if (m_products_data[i]->is_empty()) {
+				m_products_data[i] = product_data;
+				std::cout << "Data berhasil ditambahkan."
+					  << "\n";
+
+				return;
+				break;
+			}
+		}
+	}
+
+	void menu2_view_product()
+	{
+		clrscrn();
+		std::cout << "===== Produk TechMart =====" << "\n";
+		// Jika kosong berikan peringatan lalu keluar
+		if (is_fully_empty()) {
+			std::cout
+				<< "Data produk kosong, tolong tambahkan data terlebih dahulu"
+				<< std::endl;
+			return;
+		}
+
+		print_data(m_products_data);
+	}
+
 	void menu3_search_product()
 	{
 		clrscrn();
-		std::cout << "===== Cari Produk =====" << "\n"
-			  << "1. Menggunakan kode produk" << "\n"
+		std::cout << "===== Cari Produk =====" << "\n";
+
+		// Jika kosong berikan peringatan lalu keluar
+		if (is_fully_empty()) {
+			std::cout
+				<< "Data produk kosong, tolong tambahkan data terlebih dahulu"
+				<< std::endl;
+			return;
+		}
+
+		std::cout << "1. Menggunakan kode produk" << "\n"
 			  << "2. Menggunakan nama" << "\n"
 			  << "3. Keluar" << std::endl;
 		int select = get_number_input("Pilihan: ", 1, 3);
@@ -333,7 +374,7 @@ class Inventaris
 		std::cout << "===== Total Nilai Inventory =====" << "\n";
 
 		// Jika kosong berikan peringatan lalu keluar
-		if (m_products_data[0] == m_product_init) {
+		if (is_fully_empty()) {
 			std::cout
 				<< "Data produk kosong, tolong tambahkan data terlebih dahulu"
 				<< std::endl;
@@ -358,7 +399,7 @@ class Inventaris
 			  << "\n";
 
 		// Jika kosong berikan peringatan lalu keluar
-		if (m_products_data[0] == m_product_init) {
+		if (is_fully_empty()) {
 			std::cout
 				<< "Data produk kosong, tolong tambahkan data terlebih dahulu"
 				<< std::endl;
@@ -390,6 +431,36 @@ class Inventaris
 
 	void menu6_sort_by_stock()
 	{
+		clrscrn();
+		std::cout << "===== Tampilkan Produk Berdasarkan Stock ====="
+			  << "\n";
+
+		// Jika kosong berikan peringatan lalu keluar
+		if (is_fully_empty()) {
+			std::cout
+				<< "Data produk kosong, tolong tambahkan data terlebih dahulu"
+				<< std::endl;
+			return;
+		}
+
+		std::cout << "Pilih metode pengurutan" << "\n"
+			  << "1. Urutkan dari kecil ke besar" << "\n"
+			  << "2. Urutkan dari besar ke kecil" << "\n";
+		int select = get_number_input("Pilihan: ", 1, 2);
+		switch (select) {
+		case 1: {
+			std::sort(std::begin(m_products_data),
+				  std::end(m_products_data), comp_stock_asc);
+			print_data(m_products_data);
+		}
+			return;
+		case 2: {
+			std::sort(std::begin(m_products_data),
+				  std::end(m_products_data), comp_stock_des);
+			print_data(m_products_data);
+		}
+			return;
+		}
 	}
 };
 
@@ -399,21 +470,25 @@ int main(int argc, char *argv[])
 
 	while (true) {
 		clrscrn();
-		std::cout << "SISTEM MANAJEMEN INVENTARIS TECHMART" << "\n"
-			  << "====================================" << "\n"
+		std::cout << "SISTEM MANAJEMEN INVENTARIS TECHMART"
+			  << "\n"
+			  << "===================================="
+			  << "\n"
 			  << "1. Tambah produk baru" << "\n"
 			  << "2. Tampilkan semua produk" << "\n"
 			  << "3. Cari produk" << "\n"
 			  << "4. Hitung total nilai inventaris" << "\n"
-			  << "5. Tampilkan produk dengan stock < 5" << "\n"
-			  << "6. Urutkan produk berdasarkan stock" << "\n"
+			  << "5. Tampilkan produk dengan stock < 5"
+			  << "\n"
+			  << "6. Urutkan produk berdasarkan stock"
+			  << "\n"
 			  << "7. Edit stock produk" << "\n"
 			  << "8. Hapus produk" << "\n"
 			  << "9. Keluar" << std::endl;
 
 		int menuInput = get_number_input<int>("Pilih menu: ", 1, 9);
-		// Karena nilai input sudah divalidasi maka default tidak
-		// diperlukan
+		// Karena nilai input sudah divalidasi maka default
+		// tidak diperlukan
 		switch (menuInput) {
 		case 1: {
 			inventarisPtr->menu1_add_product();
