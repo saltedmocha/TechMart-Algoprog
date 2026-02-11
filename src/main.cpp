@@ -8,7 +8,7 @@
 const int MAX_SIZE = 50;
 
 struct Product {
-	std::string productCode;
+	std::string product_code;
 	std::string name;
 	std::string category;
 	double price;
@@ -16,7 +16,7 @@ struct Product {
 
 	bool is_empty()
 	{
-		if (productCode.empty() && name.empty() && category.empty()
+		if (product_code.empty() && name.empty() && category.empty()
 		    && price == 0 && stock == 0) {
 			return true;
 		}
@@ -25,20 +25,21 @@ struct Product {
 	}
 };
 
-void resetInput()
+void reset_input()
 {
 	std::cin.clear();
 	std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
 }
 
-std::string toLowerCase(const std::string &str)
+std::string to_lower_case(const std::string &str)
 {
 	std::string lower = str;
 	std::transform(lower.begin(), lower.end(), lower.begin(), tolower);
 	return lower;
 }
 
-template <typename T> T getValidInput(const std::string &prompt, T min, T max)
+template <typename T>
+T get_number_input(const std::string &prompt, T min, T max)
 {
 	T value;
 	while (true) {
@@ -49,19 +50,19 @@ template <typename T> T getValidInput(const std::string &prompt, T min, T max)
 			} else {
 				std::cout << "Error: Input harus antara " << min
 					  << " dan " << max << ".\n";
-				resetInput();
+				reset_input();
 				continue;
 			}
 		} else {
 			std::cout
 				<< "Error: Tipe data salah. Masukkan angka yang valid.\n";
-			resetInput();
+			reset_input();
 			continue;
 		}
 	}
 }
 
-std::string getStringInput(const std::string &prompt)
+std::string get_text_input(const std::string &prompt)
 {
 	std::string input;
 
@@ -86,33 +87,25 @@ void clrscrn()
 class Inventaris
 {
       private:
-	Product *productInit = new Product{};
-	Product *productsData[MAX_SIZE] = {};
+	Product *m_product_init = new Product{};
+	Product *m_products_data[MAX_SIZE] = {};
 
-      public:
-	Inventaris()
-	{
-		for (size_t i = 0; i < MAX_SIZE; i++) {
-			productsData[i] = productInit;
-		}
-	}
-
-	std::string inputCode()
+	std::string input_product_code()
 	{
 		std::string input;
-		bool isUnique = false;
+		bool is_unique = false;
 
-		while (isUnique == false) {
-			isUnique = true;
+		while (is_unique == false) {
+			is_unique = true;
 			std::cout << "Kode produk: ";
 			std::cin >> input;
 
-			for (const Product *data : productsData) {
-				if (input == data->productCode) {
+			for (const Product *data : m_products_data) {
+				if (input == data->product_code) {
 					std::cout
 						<< "Error: Kode produk telah digunakan"
 						<< "\n";
-					isUnique = false;
+					is_unique = false;
 				}
 			}
 		}
@@ -120,37 +113,51 @@ class Inventaris
 		return input;
 	}
 
-	double TotalValue(int n)
+	double total_value(int n)
 	{
 		double price = 0;
 		double stock = 0;
 
-		if (!productsData[n]->is_empty()) {
-			price = productsData[n]->price;
-			stock = static_cast<double>(productsData[n]->stock);
+		if (!m_products_data[n]->is_empty()) {
+			price = m_products_data[n]->price;
+			stock = static_cast<double>(m_products_data[n]->stock);
 		}
 
-		if (n == 0 && !productsData[0]->is_empty()) {
+		if (n == 0 && !m_products_data[0]->is_empty()) {
 			return (price * stock);
 		}
 
-		return (price * stock) + TotalValue(n - 1);
+		return (price * stock) + total_value(n - 1);
 	}
 
-	void searchByName(std::string name)
+	int array_length()
 	{
-		std::string nameLower = toLowerCase(name);
-		bool isFound = false;
+	}
+
+	bool comp_stock_des(const Product *stock_a, const Product *stock_b)
+	{
+		return stock_a->stock > stock_b->stock;
+	}
+
+	bool comp_stock_asc(const Product *stock_a, const Product *stock_b)
+	{
+		return stock_a->stock < stock_b->stock;
+	}
+
+	void search_by_name(std::string name)
+	{
+		std::string name_lower = to_lower_case(name);
+		bool is_found = false;
 
 		std::cout << "Hasil pencarian: " << "\n";
-		for (const Product *data : productsData) {
-			if (toLowerCase(data->name).find(nameLower)
+		for (const Product *data : m_products_data) {
+			if (to_lower_case(data->name).find(name_lower)
 			    != std::string::npos) {
 				std::cout
 					<< "\n"
 					<< "=============================================="
 					<< "\n"
-					<< "Kode produk: " << data->productCode
+					<< "Kode produk: " << data->product_code
 					<< "\n"
 					<< "Nama produk: " << data->name << "\n"
 					<< "Kategori: " << data->category
@@ -160,30 +167,30 @@ class Inventaris
 					<< "=============================================="
 					<< "\n";
 
-				isFound = true;
+				is_found = true;
 			}
 		}
 
-		if (!isFound) {
+		if (!is_found) {
 			std::cout << "Data tidak ditemukan..." << "\n";
 			return;
 		}
 	}
 
-	void searchByID(std::string id)
+	void search_by_id(std::string id)
 	{
-		std::string idLower = toLowerCase(id);
-		bool isFound = false;
+		std::string id_lower = to_lower_case(id);
+		bool is_found = false;
 
 		std::cout << "Hasil pencarian: " << "\n";
-		for (const Product *data : productsData) {
-			if (toLowerCase(data->productCode).find(idLower)
+		for (const Product *data : m_products_data) {
+			if (to_lower_case(data->product_code).find(id_lower)
 			    != std::string::npos) {
 				std::cout
 					<< "\n"
 					<< "=============================================="
 					<< "\n"
-					<< "Kode produk: " << data->productCode
+					<< "Kode produk: " << data->product_code
 					<< "\n"
 					<< "Nama produk: " << data->name << "\n"
 					<< "Kategori: " << data->category
@@ -193,35 +200,43 @@ class Inventaris
 					<< "=============================================="
 					<< "\n";
 
-				isFound = true;
+				is_found = true;
 			}
 		}
 
-		if (!isFound) {
+		if (!is_found) {
 			std::cout << "Data tidak ditemukan..." << "\n";
 			return;
 		}
 	}
 
-	void menu1_AddProduct()
+      public:
+	Inventaris()
+	{
+		for (size_t i = 0; i < MAX_SIZE; i++) {
+			m_products_data[i] = m_product_init;
+		}
+	}
+
+	void menu1_add_product()
 	{
 		clrscrn();
 		std::cout << "===== Tambah Produk Baru =====" << "\n";
 
-		Product *productData = new Product{};
+		Product *product_data = new Product{};
 
-		productData->productCode = inputCode();
-		productData->name = getStringInput("Nama produk: ");
-		productData->category = getStringInput("Kategori produk: ");
-		productData->price = getValidInput<double>(
+		product_data->product_code = input_product_code();
+		product_data->name = get_text_input("Nama produk: ");
+		product_data->category = get_text_input("Kategori produk: ");
+		product_data->price = get_number_input<double>(
 			"Harga produk: ", 0,
 			std::numeric_limits<double>::max());
-		productData->stock = getValidInput<int>(
+		product_data->stock = get_number_input<int>(
 			"Stock produk: ", 0, std::numeric_limits<int>::max());
 
 		for (size_t i = 0; i < MAX_SIZE; i++) {
-			if (productsData[i]->is_empty()) {
-				productsData[i] = productData;
+			if (m_products_data[i]->is_empty()) {
+				m_products_data[i] = product_data;
 				std::cout << "Data berhasil ditambahkan."
 					  << "\n";
 
@@ -231,12 +246,12 @@ class Inventaris
 		}
 	}
 
-	void menu2_tampilkanProduk()
+	void menu2_view_product()
 	{
 		clrscrn();
 		std::cout << "===== Produk TechMart =====" << "\n";
 		// Jika kosong berikan peringatan lalu keluar
-		if (productsData[0] == productInit) {
+		if (m_products_data[0] == m_product_init) {
 			std::cout
 				<< "Data produk kosong, tolong tambahkan data terlebih dahulu"
 				<< std::endl;
@@ -244,13 +259,13 @@ class Inventaris
 		}
 
 		int counter = 1;
-		for (Product *data : productsData) {
+		for (Product *data : m_products_data) {
 			if (!data->is_empty()) {
 				std::cout
 					<< "\n"
 					<< "=============================================="
 					<< "\n"
-					<< "Kode produk: " << data->productCode
+					<< "Kode produk: " << data->product_code
 					<< "\n"
 					<< "Nama produk: " << data->name << "\n"
 					<< "Kategori produk: " << data->category
@@ -268,7 +283,7 @@ class Inventaris
 						  << "\n"
 						  << "2. Keluar"
 						  << "\n";
-					int select = getValidInput<int>(
+					int select = get_number_input<int>(
 						"Pilihan: ", 1, 2);
 					switch (select) {
 					case 1: {
@@ -277,7 +292,7 @@ class Inventaris
 					}
 					case 2: {
 						std::cout.flush();
-						resetInput();
+						reset_input();
 						return;
 					}
 					}
@@ -287,23 +302,23 @@ class Inventaris
 		}
 	}
 
-	void menu3_SearchProduct()
+	void menu3_search_product()
 	{
 		clrscrn();
 		std::cout << "===== Cari Produk =====" << "\n"
 			  << "1. Menggunakan kode produk" << "\n"
 			  << "2. Menggunakan nama" << "\n"
 			  << "3. Keluar" << std::endl;
-		int select = getValidInput("Pilihan: ", 1, 3);
+		int select = get_number_input("Pilihan: ", 1, 3);
 		switch (select) {
 		case 1: {
-			std::string name = getStringInput("Nama produk: ");
-			searchByName(name);
+			std::string name = get_text_input("Kode produk: ");
+			search_by_id(name);
 			break;
 		}
 		case 2: {
-			std::string id = getStringInput("Kode produk: ");
-			searchByID(id);
+			std::string id = get_text_input("Nama produk: ");
+			search_by_name(id);
 			break;
 		}
 		case 3: {
@@ -312,13 +327,13 @@ class Inventaris
 		}
 	}
 
-	void menu4_TotalInventaris()
+	void menu4_inventory_total()
 	{
 		clrscrn();
 		std::cout << "===== Total Nilai Inventory =====" << "\n";
 
 		// Jika kosong berikan peringatan lalu keluar
-		if (productsData[0] == productInit) {
+		if (m_products_data[0] == m_product_init) {
 			std::cout
 				<< "Data produk kosong, tolong tambahkan data terlebih dahulu"
 				<< std::endl;
@@ -326,31 +341,31 @@ class Inventaris
 		}
 
 		int array_length = 0;
-		for (Product *data : productsData) {
+		for (Product *data : m_products_data) {
 			if (!data->is_empty()) {
 				array_length++;
 			}
 		}
 
 		std::cout << "Nilai total inventory adalah: Rp. "
-			  << TotalValue(array_length) << std::endl;
+			  << total_value(array_length) << std::endl;
 	}
 
-	void menu5_lowInStock()
+	void menu5_low_in_stock()
 	{
 		clrscrn();
 		std::cout << "===== Jumlah Produk Dengan Stock Sedikit ====="
 			  << "\n";
 
 		// Jika kosong berikan peringatan lalu keluar
-		if (productsData[0] == productInit) {
+		if (m_products_data[0] == m_product_init) {
 			std::cout
 				<< "Data produk kosong, tolong tambahkan data terlebih dahulu"
 				<< std::endl;
 			return;
 		}
 
-		for (Product *data : productsData) {
+		for (Product *data : m_products_data) {
 			if (data->is_empty()) {
 				continue;
 			}
@@ -360,7 +375,7 @@ class Inventaris
 					<< "\n"
 					<< "=============================================="
 					<< "\n"
-					<< "Kode produk: " << data->productCode
+					<< "Kode produk: " << data->product_code
 					<< "\n"
 					<< "Nama produk: " << data->name << "\n"
 					<< "Kategori: " << data->category
@@ -371,6 +386,10 @@ class Inventaris
 					<< "\n";
 			}
 		}
+	}
+
+	void menu6_sort_by_stock()
+	{
 	}
 };
 
@@ -392,31 +411,32 @@ int main(int argc, char *argv[])
 			  << "8. Hapus produk" << "\n"
 			  << "9. Keluar" << std::endl;
 
-		int menuInput = getValidInput<int>("Pilih menu: ", 1, 9);
+		int menuInput = get_number_input<int>("Pilih menu: ", 1, 9);
 		// Karena nilai input sudah divalidasi maka default tidak
 		// diperlukan
 		switch (menuInput) {
 		case 1: {
-			inventarisPtr->menu1_AddProduct();
+			inventarisPtr->menu1_add_product();
 			break;
 		}
 		case 2: {
-			inventarisPtr->menu2_tampilkanProduk();
+			inventarisPtr->menu2_view_product();
 			break;
 		}
 		case 3: {
-			inventarisPtr->menu3_SearchProduct();
+			inventarisPtr->menu3_search_product();
 			break;
 		}
 		case 4: {
-			inventarisPtr->menu4_TotalInventaris();
+			inventarisPtr->menu4_inventory_total();
 			break;
 		}
 		case 5: {
-			inventarisPtr->menu5_lowInStock();
+			inventarisPtr->menu5_low_in_stock();
 			break;
 		}
 		case 6: {
+			inventarisPtr->menu6_sort_by_stock();
 			break;
 		}
 		case 7: {
@@ -432,7 +452,7 @@ int main(int argc, char *argv[])
 
 		std::cout.flush();
 		std::cout << "\n[Enter] Kembali ke menu...";
-		resetInput();
+		reset_input();
 		std::cin.get();
 		clrscrn();
 	}
