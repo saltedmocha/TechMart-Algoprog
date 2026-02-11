@@ -1,5 +1,4 @@
 #include <algorithm>
-#include <cstddef>
 #include <iostream>
 #include <iterator>
 #include <limits>
@@ -39,10 +38,32 @@ std::string to_lower_case(const std::string &str)
 	return lower;
 }
 
-template <typename T>
-T get_number_input(const std::string &prompt, T min, T max)
+int get_int_input(const std::string &prompt, int min, int max)
 {
-	T value;
+	int value;
+	while (true) {
+		std::cout << prompt;
+		if (std::cin >> value) {
+			if (value >= min && value <= max) {
+				return value;
+			} else {
+				std::cout << "Error: Input harus antara " << min
+					  << " dan " << max << ".\n";
+				reset_input();
+				continue;
+			}
+		} else {
+			std::cout
+				<< "Error: Tipe data salah. Masukkan angka yang valid.\n";
+			reset_input();
+			continue;
+		}
+	}
+}
+
+double get_double_input(const std::string &prompt, double min, double max)
+{
+	double value;
 	while (true) {
 		std::cout << prompt;
 		if (std::cin >> value) {
@@ -264,7 +285,7 @@ class Inventaris
 						  << "\n"
 						  << "2. Keluar"
 						  << "\n";
-					int select = get_number_input<int>(
+					int select = get_int_input(
 						"Pilihan: ", 1, 2);
 					switch (select) {
 					case 1: {
@@ -301,10 +322,10 @@ class Inventaris
 		product_data->product_code = input_product_code();
 		product_data->name = get_text_input("Nama produk: ");
 		product_data->category = get_text_input("Kategori produk: ");
-		product_data->price = get_number_input<double>(
-			"Harga produk: ", 0,
-			std::numeric_limits<double>::max());
-		product_data->stock = get_number_input<int>(
+		product_data->price =
+			get_double_input("Harga produk: ", 0,
+					 std::numeric_limits<double>::max());
+		product_data->stock = get_int_input(
 			"Stock produk: ", 0, std::numeric_limits<int>::max());
 
 		for (int i = 0; i < MAX_SIZE; i++) {
@@ -350,7 +371,7 @@ class Inventaris
 		std::cout << "1. Menggunakan kode produk" << "\n"
 			  << "2. Menggunakan nama" << "\n"
 			  << "3. Keluar" << std::endl;
-		int select = get_number_input("Pilihan: ", 1, 3);
+		int select = get_int_input("Pilihan: ", 1, 3);
 		switch (select) {
 		case 1: {
 			std::string name = get_text_input("Kode produk: ");
@@ -446,7 +467,7 @@ class Inventaris
 		std::cout << "Pilih metode pengurutan" << "\n"
 			  << "1. Urutkan dari kecil ke besar" << "\n"
 			  << "2. Urutkan dari besar ke kecil" << "\n";
-		int select = get_number_input("Pilihan: ", 1, 2);
+		int select = get_int_input("Pilihan: ", 1, 2);
 		switch (select) {
 		case 1: {
 			std::sort(std::begin(m_products_data),
@@ -459,6 +480,57 @@ class Inventaris
 				  std::end(m_products_data), comp_stock_des);
 			print_data(m_products_data);
 		}
+			return;
+		}
+	}
+
+	void menu7_edit_product()
+	{
+		std::cout << "===== Edit Data Produk TechMart =====" << "\n";
+		// Jika kosong berikan peringatan lalu keluar
+		if (is_fully_empty()) {
+			std::cout
+				<< "Data produk kosong, tolong tambahkan data terlebih dahulu"
+				<< std::endl;
+			return;
+		}
+
+		std::string id = get_text_input("Masukan id produk: ");
+
+		std::string id_lower = to_lower_case(id);
+		bool is_found = false;
+
+		for (Product *data : m_products_data) {
+			if (to_lower_case(data->product_code).find(id_lower)
+			    != std::string::npos) {
+				std::cout << "Data ditemukan." << "\n";
+				is_found = true;
+				Product *product_data = new Product{};
+
+				product_data->name =
+					get_text_input("Nama produk: ");
+				product_data->category =
+					get_text_input("Kategori produk: ");
+				product_data->price = get_double_input(
+					"Harga produk: ", 0,
+					std::numeric_limits<double>::max());
+				product_data->stock = get_int_input(
+					"Stock produk: ", 0,
+					std::numeric_limits<int>::max());
+
+				data->name = product_data->name;
+				data->category = product_data->category;
+				data->price = product_data->price;
+				data->stock = product_data->stock;
+
+				std::cout << "Data berhasil diperbarui."
+					  << std::endl;
+				return;
+			}
+		}
+
+		if (!is_found) {
+			std::cout << "Data tidak ditemukan..." << "\n";
 			return;
 		}
 	}
@@ -486,7 +558,7 @@ int main(int argc, char *argv[])
 			  << "8. Hapus produk" << "\n"
 			  << "9. Keluar" << std::endl;
 
-		int menuInput = get_number_input<int>("Pilih menu: ", 1, 9);
+		int menuInput = get_int_input("Pilih menu: ", 1, 9);
 		// Karena nilai input sudah divalidasi maka default
 		// tidak diperlukan
 		switch (menuInput) {
@@ -515,6 +587,7 @@ int main(int argc, char *argv[])
 			break;
 		}
 		case 7: {
+			inventarisPtr->menu7_edit_product();
 			break;
 		}
 		case 8: {
