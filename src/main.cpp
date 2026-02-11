@@ -14,6 +14,10 @@ struct Product {
     double price;
     int stock;
 
+    // Fungsi ini memastikan bahwa nilai pada struct
+    // Adalah nilai defaultnya yaitu "" dan 0
+    // Jika iya maka akhiri fungsi dan kemblikan true
+    // Jika tidak false
     bool is_empty()
     {
 	if (product_code.empty() && name.empty() && category.empty()
@@ -25,11 +29,14 @@ struct Product {
     }
 };
 
+// Fungi ini digunakan untuk membersihkan / flushing cin
+// Agar input selanjutnya tidak memiliki kesalahan / masalah
 void reset_input()
 {
     std::cin.clear();
     std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
 }
+
 
 std::string to_lower_case(const std::string &str)
 {
@@ -294,6 +301,11 @@ class Inventaris
 	for (int i = 0; i < MAX_SIZE; i++) {
 	    m_products_data[i] = m_product_init;
 	}
+    }
+
+    ~Inventaris()
+    {
+	delete m_product_init;
     }
 
     void menu1_add_product()
