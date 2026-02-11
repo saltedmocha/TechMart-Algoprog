@@ -41,6 +41,22 @@ template <typename T> T getValidInput(const std::string &prompt, T min, T max)
 	}
 }
 
+std::string getStringInput(const std::string &prompt)
+{
+	std::string input;
+
+	while (true) {
+		std::cout << prompt;
+		std::cin >> input;
+		if (!input.empty()) {
+			std::cout << std::endl;
+			return input;
+		}
+
+		std::cout << "Error: Nama tidak boleh kosong." << "\n";
+	}
+}
+
 // Pembersih console / cmd tanpa bergantung
 // Ke tipe atau jenis sistem operasi
 void clrscrn()
@@ -72,7 +88,26 @@ class Inventaris
 		clrscrn();
 		std::cout << "=== Tambah Produk Baru ===" << "\n";
 
-		Product productData = Product{};
+		Product *productData = new Product{};
+		productData->productCode = getStringInput("Kode produk: ");
+		productData->name = getStringInput("Nama produk: ");
+		productData->category = getStringInput("Kategori produk: ");
+		productData->price = getValidInput<double>(
+			"Harga produk: ", 0,
+			std::numeric_limits<double>::max());
+		productData->stock = getValidInput<int>(
+			"Stock produk: ", 0, std::numeric_limits<int>::max());
+
+		for (const Product *data : productsData) {
+			if (data == productInit) {
+				data = productData;
+				std::cout << "Data berhasil ditambahkan."
+					  << "\n";
+				return;
+			} else {
+				continue;
+			}
+		}
 	}
 
 	void menu4_TotalInventaris()
@@ -106,9 +141,9 @@ int main(int argc, char *argv[])
 			  << "2. Tampilkan semua produk" << "\n"
 			  << "3. Cari produk (berdasarkan kode)" << "\n"
 			  << "4. Hitung total nilai inventaris" << "\n"
-			  << "5. Tampilkan produk dengan stok menipis" << "\n"
-			  << "6. Urutkan produk berdasarkan stok" << "\n"
-			  << "7. Edit stok produk" << "\n"
+			  << "5. Tampilkan produk dengan stock < 5" << "\n"
+			  << "6. Urutkan produk berdasarkan stock" << "\n"
+			  << "7. Edit stock produk" << "\n"
 			  << "8. Hapus produk" << "\n"
 			  << "9. Keluar" << std::endl;
 
@@ -117,6 +152,7 @@ int main(int argc, char *argv[])
 		// diperlukan
 		switch (menuInput) {
 		case 1:
+			inventarisPtr->menu1_AddProduct();
 			break;
 		case 2:
 			break;
@@ -140,9 +176,8 @@ int main(int argc, char *argv[])
 		std::cout << "\n[Enter] Kembali ke menu...";
 		resetInput();
 		std::cin.get();
+		clrscrn();
 	}
-
-	inventarisPtr->test_array();
 
 	return 0;
 }
