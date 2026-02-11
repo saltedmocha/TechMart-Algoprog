@@ -1,3 +1,5 @@
+#include <cmath>
+#include <cstddef>
 #include <iostream>
 #include <limits>
 #include <string>
@@ -10,6 +12,16 @@ struct Product {
 	std::string category;
 	double price;
 	int stock;
+
+	bool is_empty()
+	{
+		if (productCode.empty() && name.empty() && category.empty()
+		    && price == 0 && stock == 0) {
+			return true;
+		}
+
+		return false;
+	}
 };
 
 void resetInput()
@@ -49,7 +61,6 @@ std::string getStringInput(const std::string &prompt)
 		std::cout << prompt;
 		std::cin >> input;
 		if (!input.empty()) {
-			std::cout << std::endl;
 			return input;
 		}
 
@@ -68,9 +79,16 @@ class Inventaris
 {
       private:
 	Product *productInit = new Product{};
-	Product *productsData[MAX_SIZE] = {productInit};
+	Product *productsData[MAX_SIZE] = {};
 
       public:
+	Inventaris()
+	{
+		for (size_t i = 0; i < MAX_SIZE; i++) {
+			productsData[i] = productInit;
+		}
+	}
+
 	double TotalValue(int n)
 	{
 		if (n == 0) {
@@ -98,14 +116,56 @@ class Inventaris
 		productData->stock = getValidInput<int>(
 			"Stock produk: ", 0, std::numeric_limits<int>::max());
 
-		for (const Product *data : productsData) {
-			if (data == productInit) {
-				data = productData;
+		for (size_t i = 0; i < MAX_SIZE; i++) {
+			if (productsData[i]->is_empty()) {
+				productsData[i] = productData;
 				std::cout << "Data berhasil ditambahkan."
 					  << "\n";
+
 				return;
-			} else {
-				continue;
+				break;
+			}
+		}
+	}
+
+	void menu2_tampilkanProduk()
+	{
+		clrscrn();
+
+		std::cout << "===== Produk TechMart =====" << "\n";
+		int counter = 1;
+		for (Product *data : productsData) {
+			if (!data->is_empty()) {
+				std::cout
+					<< "Kode produk: " << data->productCode
+					<< "\n"
+					<< "Nama produk: " << data->name << "\n"
+					<< "Kategori produk: " << data->category
+					<< "\n"
+					<< "Harga produk: " << data->price
+					<< "\n"
+					<< "Stock produk: " << data->stock
+					<< "\n\n";
+				if (counter == 10) {
+					std::cout << "Lanjutkan / Keluar"
+						  << "\n"
+						  << "1. Lanjutkan (10 items)"
+						  << "\n"
+						  << "2. Keluar"
+						  << "\n";
+					int select = getValidInput<int>(
+						"Pilihan: ", 1, 2);
+					switch (select) {
+					case 1:
+						counter = 1;
+						continue;
+					case 2:
+						std::cout.flush();
+						resetInput();
+						return;
+					}
+				}
+				counter++;
 			}
 		}
 	}
@@ -135,6 +195,7 @@ int main(int argc, char *argv[])
 	Inventaris *inventarisPtr = new Inventaris;
 
 	while (true) {
+		clrscrn();
 		std::cout << "SISTEM MANAJEMEN INVENTARIS TECHMART" << "\n"
 			  << "====================================" << "\n"
 			  << "1. Tambah produk baru" << "\n"
@@ -155,6 +216,7 @@ int main(int argc, char *argv[])
 			inventarisPtr->menu1_AddProduct();
 			break;
 		case 2:
+			inventarisPtr->menu2_tampilkanProduk();
 			break;
 		case 3:
 			break;
