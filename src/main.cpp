@@ -151,27 +151,24 @@ class Inventaris
 	double price = 0;
 	double stock = 0;
 
+	if (n == 0 && m_products_data[0]->is_empty()) {
+	    return (price * stock);
+	}
+
+	if (n == 0 && !m_products_data[0]->is_empty()) {
+	    price = m_products_data[n]->price;
+	    stock = static_cast<double>(m_products_data[n]->stock);
+
+	    return (price * stock);
+	}
+
 	if (!m_products_data[n]->is_empty()) {
 	    price = m_products_data[n]->price;
 	    stock = static_cast<double>(m_products_data[n]->stock);
 	}
 
-	if (n == 0 && !m_products_data[0]->is_empty()) {
-	    return (price * stock);
-	}
 
 	return (price * stock) + total_value(n - 1);
-    }
-
-    int array_length()
-    {
-	int length = 0;
-	for (Product *data : m_products_data) {
-	    if (!data->is_empty())
-		length++;
-	}
-
-	return length;
     }
 
     bool is_fully_empty()
@@ -321,7 +318,6 @@ class Inventaris
 			  << "\n";
 
 		return;
-		break;
 	    }
 	}
     }
@@ -388,15 +384,8 @@ class Inventaris
 	    return;
 	}
 
-	int array_length = 0;
-	for (Product *data : m_products_data) {
-	    if (!data->is_empty()) {
-		array_length++;
-	    }
-	}
-
 	std::cout << "Nilai total inventory adalah: Rp. "
-		  << total_value(array_length) << std::endl;
+		  << total_value(MAX_SIZE - 1) << std::endl;
     }
 
     void menu5_low_in_stock()
@@ -611,6 +600,7 @@ int main(int argc, char *argv[])
 	    break;
 	}
 	case 9: {
+	    delete inventarisPtr;
 	    return 0;
 	}
 	}
