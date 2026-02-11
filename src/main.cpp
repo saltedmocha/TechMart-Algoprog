@@ -148,7 +148,7 @@ class Inventaris
 			    != std::string::npos) {
 				std::cout
 					<< "\n"
-					<< "==================================="
+					<< "=============================================="
 					<< "\n"
 					<< "Kode produk: " << data->productCode
 					<< "\n"
@@ -157,7 +157,7 @@ class Inventaris
 					<< "\n"
 					<< "Harga: " << data->price << "\n"
 					<< "Stock: " << data->stock << "\n"
-					<< "==================================="
+					<< "=============================================="
 					<< "\n";
 
 				isFound = true;
@@ -181,7 +181,7 @@ class Inventaris
 			    != std::string::npos) {
 				std::cout
 					<< "\n"
-					<< "==================================="
+					<< "=============================================="
 					<< "\n"
 					<< "Kode produk: " << data->productCode
 					<< "\n"
@@ -190,7 +190,7 @@ class Inventaris
 					<< "\n"
 					<< "Harga: " << data->price << "\n"
 					<< "Stock: " << data->stock << "\n"
-					<< "==================================="
+					<< "=============================================="
 					<< "\n";
 
 				isFound = true;
@@ -247,6 +247,9 @@ class Inventaris
 		for (Product *data : productsData) {
 			if (!data->is_empty()) {
 				std::cout
+					<< "\n"
+					<< "=============================================="
+					<< "\n"
 					<< "Kode produk: " << data->productCode
 					<< "\n"
 					<< "Nama produk: " << data->name << "\n"
@@ -255,7 +258,9 @@ class Inventaris
 					<< "Harga produk: " << data->price
 					<< "\n"
 					<< "Stock produk: " << data->stock
-					<< "\n\n";
+					<< "\n"
+					<< "=============================================="
+					<< "\n";
 				if (counter == 10) {
 					std::cout << "Lanjutkan / Keluar"
 						  << "\n"
@@ -330,6 +335,43 @@ class Inventaris
 		std::cout << "Nilai total inventory adalah: Rp. "
 			  << TotalValue(array_length) << std::endl;
 	}
+
+	void menu5_lowInStock()
+	{
+		clrscrn();
+		std::cout << "===== Jumlah Produk Dengan Stock Sedikit ====="
+			  << "\n";
+
+		// Jika kosong berikan peringatan lalu keluar
+		if (productsData[0] == productInit) {
+			std::cout
+				<< "Data produk kosong, tolong tambahkan data terlebih dahulu"
+				<< std::endl;
+			return;
+		}
+
+		for (Product *data : productsData) {
+			if (data->is_empty()) {
+				continue;
+			}
+
+			if (data->stock <= 5) {
+				std::cout
+					<< "\n"
+					<< "=============================================="
+					<< "\n"
+					<< "Kode produk: " << data->productCode
+					<< "\n"
+					<< "Nama produk: " << data->name << "\n"
+					<< "Kategori: " << data->category
+					<< "\n"
+					<< "Harga: " << data->price << "\n"
+					<< "Stock: " << data->stock << "\n"
+					<< "=============================================="
+					<< "\n";
+			}
+		}
+	}
 };
 
 int main(int argc, char *argv[])
@@ -371,6 +413,7 @@ int main(int argc, char *argv[])
 			break;
 		}
 		case 5: {
+			inventarisPtr->menu5_lowInStock();
 			break;
 		}
 		case 6: {
