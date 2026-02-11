@@ -534,6 +534,44 @@ class Inventaris
 			return;
 		}
 	}
+
+	void menu8_delete_data()
+	{
+		std::cout << "===== Edit Data Produk TechMart =====" << "\n";
+		// Jika kosong berikan peringatan lalu keluar
+		if (is_fully_empty()) {
+			std::cout
+				<< "Data produk kosong, tolong tambahkan data terlebih dahulu"
+				<< std::endl;
+			return;
+		}
+
+		std::string id = get_text_input("Masukan id produk: ");
+
+		std::string id_lower = to_lower_case(id);
+		bool is_found = false;
+
+		for (Product *data : m_products_data) {
+			if (to_lower_case(data->product_code).find(id_lower)
+			    != std::string::npos) {
+				is_found = true;
+				data->product_code = "";
+				data->name = "";
+				data->category = "";
+				data->price = 0;
+				data->stock = 0;
+
+				std::cout << "Data berhasil dihapus."
+					  << std::endl;
+				return;
+			}
+		}
+
+		if (!is_found) {
+			std::cout << "Data tidak ditemukan..." << "\n";
+			return;
+		}
+	}
 };
 
 int main(int argc, char *argv[])
@@ -591,6 +629,7 @@ int main(int argc, char *argv[])
 			break;
 		}
 		case 8: {
+			inventarisPtr->menu8_delete_data();
 			break;
 		}
 		case 9: {
