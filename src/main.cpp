@@ -2,6 +2,7 @@
 #include <cstddef>
 #include <iostream>
 #include <limits>
+#include <ostream>
 #include <string>
 
 const int MAX_SIZE = 50;
@@ -89,25 +90,62 @@ class Inventaris
 		}
 	}
 
-	double TotalValue(int n)
+	std::string inputCode()
 	{
-		if (n == 0) {
-			return 0;
+		std::string input;
+		bool isUnique = false;
+
+		while (isUnique == false) {
+			isUnique = true;
+			std::cout << "Kode produk: ";
+			std::cin >> input;
+
+			for (const Product *data : productsData) {
+				if (input == data->productCode) {
+					std::cout
+						<< "Error: Kode produk telah digunakan"
+						<< "\n";
+					isUnique = false;
+				}
+			}
 		}
 
-		double price = productsData[n]->price;
-		double stock = static_cast<double>(productsData[n]->stock);
+		return input;
+	}
+
+	double TotalValue(int n)
+	{
+		double price = 0;
+		double stock = 0;
+
+		if (!productsData[n]->is_empty()) {
+			price = productsData[n]->price;
+			stock = static_cast<double>(productsData[n]->stock);
+		}
+
+		if (n == 0 && !productsData[0]->is_empty()) {
+			return (price * stock);
+		}
 
 		return (price * stock) + TotalValue(n - 1);
+	}
+
+	void searchByName(std::string name)
+	{
+	}
+
+	void searchByID(std::string id)
+	{
 	}
 
 	void menu1_AddProduct()
 	{
 		clrscrn();
-		std::cout << "=== Tambah Produk Baru ===" << "\n";
+		std::cout << "===== Tambah Produk Baru =====" << "\n";
 
 		Product *productData = new Product{};
-		productData->productCode = getStringInput("Kode produk: ");
+
+		productData->productCode = inputCode();
 		productData->name = getStringInput("Nama produk: ");
 		productData->category = getStringInput("Kategori produk: ");
 		productData->price = getValidInput<double>(
@@ -170,8 +208,14 @@ class Inventaris
 		}
 	}
 
+	void menu3_SearchProduct()
+	{
+	}
+
 	void menu4_TotalInventaris()
 	{
+		std::cout << "===== Total Nilai Inventory =====" << "\n";
+
 		// Jika kosong berikan peringatan lalu keluar
 		if (productsData[0] == productInit) {
 			std::cout
@@ -181,8 +225,10 @@ class Inventaris
 		}
 
 		int array_length = 0;
-		for (const Product *_ : productsData) {
-			array_length++;
+		for (Product *data : productsData) {
+			if (!data->is_empty()) {
+				array_length++;
+			}
 		}
 
 		std::cout << "Nilai total inventory adalah: Rp. "
@@ -200,7 +246,7 @@ int main(int argc, char *argv[])
 			  << "====================================" << "\n"
 			  << "1. Tambah produk baru" << "\n"
 			  << "2. Tampilkan semua produk" << "\n"
-			  << "3. Cari produk (berdasarkan kode)" << "\n"
+			  << "3. Cari produk" << "\n"
 			  << "4. Hitung total nilai inventaris" << "\n"
 			  << "5. Tampilkan produk dengan stock < 5" << "\n"
 			  << "6. Urutkan produk berdasarkan stock" << "\n"
@@ -235,6 +281,7 @@ int main(int argc, char *argv[])
 			return 0;
 		}
 
+		std::cout.flush();
 		std::cout << "\n[Enter] Kembali ke menu...";
 		resetInput();
 		std::cin.get();
