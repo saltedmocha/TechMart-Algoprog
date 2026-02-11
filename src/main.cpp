@@ -1,4 +1,4 @@
-#include <cmath>
+#include <algorithm>
 #include <cstddef>
 #include <iostream>
 #include <limits>
@@ -29,6 +29,13 @@ void resetInput()
 {
 	std::cin.clear();
 	std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+}
+
+std::string toLowerCase(const std::string &str)
+{
+	std::string lower = str;
+	std::transform(lower.begin(), lower.end(), lower.begin(), tolower);
+	return lower;
 }
 
 template <typename T> T getValidInput(const std::string &prompt, T min, T max)
@@ -132,10 +139,68 @@ class Inventaris
 
 	void searchByName(std::string name)
 	{
+		std::string nameLower = toLowerCase(name);
+		bool isFound = false;
+
+		std::cout << "Hasil pencarian: " << "\n";
+		for (const Product *data : productsData) {
+			if (toLowerCase(data->name).find(nameLower)
+			    != std::string::npos) {
+				std::cout
+					<< "\n"
+					<< "==================================="
+					<< "\n"
+					<< "Kode produk: " << data->productCode
+					<< "\n"
+					<< "Nama produk: " << data->name << "\n"
+					<< "Kategori: " << data->category
+					<< "\n"
+					<< "Harga: " << data->price << "\n"
+					<< "Stock: " << data->stock << "\n"
+					<< "==================================="
+					<< "\n";
+
+				isFound = true;
+			}
+		}
+
+		if (!isFound) {
+			std::cout << "Data tidak ditemukan..." << "\n";
+			return;
+		}
 	}
 
 	void searchByID(std::string id)
 	{
+		std::string idLower = toLowerCase(id);
+		bool isFound = false;
+
+		std::cout << "Hasil pencarian: " << "\n";
+		for (const Product *data : productsData) {
+			if (toLowerCase(data->productCode).find(idLower)
+			    != std::string::npos) {
+				std::cout
+					<< "\n"
+					<< "==================================="
+					<< "\n"
+					<< "Kode produk: " << data->productCode
+					<< "\n"
+					<< "Nama produk: " << data->name << "\n"
+					<< "Kategori: " << data->category
+					<< "\n"
+					<< "Harga: " << data->price << "\n"
+					<< "Stock: " << data->stock << "\n"
+					<< "==================================="
+					<< "\n";
+
+				isFound = true;
+			}
+		}
+
+		if (!isFound) {
+			std::cout << "Data tidak ditemukan..." << "\n";
+			return;
+		}
 	}
 
 	void menu1_AddProduct()
@@ -169,8 +234,15 @@ class Inventaris
 	void menu2_tampilkanProduk()
 	{
 		clrscrn();
-
 		std::cout << "===== Produk TechMart =====" << "\n";
+		// Jika kosong berikan peringatan lalu keluar
+		if (productsData[0] == productInit) {
+			std::cout
+				<< "Data produk kosong, tolong tambahkan data terlebih dahulu"
+				<< std::endl;
+			return;
+		}
+
 		int counter = 1;
 		for (Product *data : productsData) {
 			if (!data->is_empty()) {
@@ -194,13 +266,15 @@ class Inventaris
 					int select = getValidInput<int>(
 						"Pilihan: ", 1, 2);
 					switch (select) {
-					case 1:
+					case 1: {
 						counter = 1;
 						continue;
-					case 2:
+					}
+					case 2: {
 						std::cout.flush();
 						resetInput();
 						return;
+					}
 					}
 				}
 				counter++;
@@ -210,10 +284,32 @@ class Inventaris
 
 	void menu3_SearchProduct()
 	{
+		clrscrn();
+		std::cout << "===== Cari Produk =====" << "\n"
+			  << "1. Menggunakan kode produk" << "\n"
+			  << "2. Menggunakan nama" << "\n"
+			  << "3. Keluar" << std::endl;
+		int select = getValidInput("Pilihan: ", 1, 3);
+		switch (select) {
+		case 1: {
+			std::string name = getStringInput("Nama produk: ");
+			searchByName(name);
+			break;
+		}
+		case 2: {
+			std::string id = getStringInput("Kode produk: ");
+			searchByID(id);
+			break;
+		}
+		case 3: {
+			return;
+		}
+		}
 	}
 
 	void menu4_TotalInventaris()
 	{
+		clrscrn();
 		std::cout << "===== Total Nilai Inventory =====" << "\n";
 
 		// Jika kosong berikan peringatan lalu keluar
@@ -258,27 +354,37 @@ int main(int argc, char *argv[])
 		// Karena nilai input sudah divalidasi maka default tidak
 		// diperlukan
 		switch (menuInput) {
-		case 1:
+		case 1: {
 			inventarisPtr->menu1_AddProduct();
 			break;
-		case 2:
+		}
+		case 2: {
 			inventarisPtr->menu2_tampilkanProduk();
 			break;
-		case 3:
+		}
+		case 3: {
+			inventarisPtr->menu3_SearchProduct();
 			break;
-		case 4:
+		}
+		case 4: {
 			inventarisPtr->menu4_TotalInventaris();
 			break;
-		case 5:
+		}
+		case 5: {
 			break;
-		case 6:
+		}
+		case 6: {
 			break;
-		case 7:
+		}
+		case 7: {
 			break;
-		case 8:
+		}
+		case 8: {
 			break;
-		case 9:
+		}
+		case 9: {
 			return 0;
+		}
 		}
 
 		std::cout.flush();
