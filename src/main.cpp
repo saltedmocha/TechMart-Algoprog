@@ -1,5 +1,5 @@
 #include <algorithm>
-#include <atomic>
+#include <cstdlib>
 #include <iostream>
 #include <iterator>
 #include <limits>
@@ -364,7 +364,6 @@ class Inventaris
 		    }
 		    case 2: {
 			std::cout.flush();
-			reset_input();
 			return;
 		    }
 		    }
@@ -388,11 +387,18 @@ class Inventaris
     }
 
     // Deconstructor dari class
+    // Pertama proses dealokasi akan dimulai dari struct yang memiliki nilai
+    // Kemudian default value atau 'm_product_init' akan di dialokasi
+    // Jika sudah keluar dari fungsi
     ~Inventaris()
     {
-	// Karena delete hanya ditujukan untuk pointer yang menggunakan new
-	// Maka 'm_products_data' tidak diperlukan untuk melakukan delete
+	for (Product *data : m_products_data) {
+	    if (!data->is_empty())
+		delete data;
+	}
+
 	delete m_product_init;
+	return;
     }
 
     // Pada fungsi ini pointer untuk data produk akan diinisialisasi
@@ -423,7 +429,6 @@ class Inventaris
 		m_products_data[i] = product_data;
 		std::cout << "Data berhasil ditambahkan."
 			  << "\n";
-
 		return;
 	    }
 	}
@@ -506,7 +511,7 @@ class Inventaris
 	    return;
 	}
 
-	std::cout << "Nilai total inventory adalah: Rp. "
+	std::cout << std::fixed << "Nilai total inventory adalah: Rp. "
 		  << total_value(MAX_SIZE - 1) << std::endl;
     }
 
@@ -603,6 +608,10 @@ class Inventaris
     // masing - masing
     // Jika tidak ada maka pengguna akan diberikan peringatan sebelum keluar
     // dari fungsi
+    //
+    // Pointer product_data akan dihapus sebelum keluar dari fungsi
+    // Ini dikarenakan pointer tersebut hanya bertugas sebagai temp variable
+    // Jika tidak maka akan terjadi memory leak
     void menu7_edit_product()
     {
 	std::cout << "===== Edit Data Produk TechMart =====" << "\n";
@@ -618,13 +627,13 @@ class Inventaris
 
 	std::string id_lower = to_lower_case(id);
 	bool is_found = false;
+	Product *product_data = new Product{};
 
 	for (Product *data : m_products_data) {
 	    if (to_lower_case(data->product_code).find(id_lower)
 		!= std::string::npos) {
 		std::cout << "Data ditemukan." << "\n";
 		is_found = true;
-		Product *product_data = new Product{};
 
 		product_data->name = get_text_input("Nama produk: ");
 		product_data->category = get_text_input("Kategori produk: ");
@@ -640,6 +649,7 @@ class Inventaris
 		data->stock = product_data->stock;
 
 		std::cout << "Data berhasil diperbarui." << std::endl;
+		delete product_data;
 		return;
 	    }
 	}
@@ -766,8 +776,8 @@ int main()
 
 	std::cout.flush();
 	std::cout << "\n[Enter] Kembali ke menu...";
-	reset_input();
 	std::cin.get();
+	reset_input();
 	clrscrn();
     }
 
