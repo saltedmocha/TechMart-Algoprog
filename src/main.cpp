@@ -112,7 +112,7 @@ std::string get_text_input(const std::string &prompt)
 
     while (true) {
 	std::cout << prompt;
-	std::cin >> input;
+	getline(std::cin, input);
 	if (!input.empty()) {
 	    return input;
 	}
@@ -164,6 +164,18 @@ class Inventaris
     Product *m_product_init = new Product{};
     Product *m_products_data[MAX_SIZE] = {};
 
+    bool is_exist(std::string input)
+    {
+	for (const Product *data : m_products_data) {
+	    if (input == data->product_code) {
+		std::cout << "Error: Kode produk telah digunakan"
+			  << "\n";
+		return true;
+	    }
+	}
+	return false;
+    }
+
     // Fungsi ini berbeda dengan get_text_input
     // Karena fungsi ini memiliki tanggung jawab tambahan
     // Yaitu memastikan bahwa id pasti unik dan tidak dipakai ulang
@@ -175,20 +187,16 @@ class Inventaris
     std::string input_product_code()
     {
 	std::string input;
-	bool is_unique = false;
 
-	while (is_unique == false) {
-	    is_unique = true;
+	reset_input();
+	while (true) {
 	    std::cout << "Kode produk: ";
-	    std::cin >> input;
-
-	    for (const Product *data : m_products_data) {
-		if (input == data->product_code) {
-		    std::cout << "Error: Kode produk telah digunakan"
-			      << "\n";
-		    is_unique = false;
-		}
+	    getline(std::cin, input);
+	    if (!input.empty() && !is_exist(input)) {
+		return input;
 	    }
+
+	    std::cout << "Error: Kode produk tidak oleh kosong" << "\n";
 	}
 
 	return input;
@@ -479,11 +487,13 @@ class Inventaris
 	int select = get_int_input("Pilihan: ", 1, 3);
 	switch (select) {
 	case 1: {
+	    reset_input();
 	    std::string name = get_text_input("Kode produk: ");
 	    search_by_id(name);
 	    break;
 	}
 	case 2: {
+	    reset_input();
 	    std::string id = get_text_input("Nama produk: ");
 	    search_by_name(id);
 	    break;
@@ -614,6 +624,7 @@ class Inventaris
     // Jika tidak maka akan terjadi memory leak
     void menu7_edit_product()
     {
+	clrscrn();
 	std::cout << "===== Edit Data Produk TechMart =====" << "\n";
 	// Jika kosong berikan peringatan lalu keluar
 	if (is_fully_empty()) {
@@ -623,6 +634,7 @@ class Inventaris
 	    return;
 	}
 
+	reset_input();
 	std::string id = get_text_input("Masukan id produk: ");
 
 	std::string id_lower = to_lower_case(id);
@@ -667,6 +679,7 @@ class Inventaris
     // akan dilewati jika dilakukan pencarian / pembacaan nilai
     void menu8_delete_data()
     {
+	clrscrn();
 	std::cout << "===== Edit Data Produk TechMart =====" << "\n";
 	// Jika kosong berikan peringatan lalu keluar
 	if (is_fully_empty()) {
@@ -676,6 +689,7 @@ class Inventaris
 	    return;
 	}
 
+	reset_input();
 	std::string id = get_text_input("Masukan id produk: ");
 
 	std::string id_lower = to_lower_case(id);
