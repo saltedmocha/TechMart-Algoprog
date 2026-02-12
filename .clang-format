@@ -1,7 +1,7 @@
 ---
 BasedOnStyle: LLVM
 Language: Cpp
-IndentWidth: 4
+IndentWidth: 8
 UseTab: Always
 BreakBeforeBraces: Linux
 AlwaysBreakBeforeMultilineStrings: true
